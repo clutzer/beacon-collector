@@ -1,0 +1,35 @@
+# vim: set ts=2 sw=2 et:
+
+networks:
+  backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/24
+          ip_range: 172.18.0.128/25
+
+services:
+  lb:
+    image: traefik:latest
+    ports:
+      - "${PUBLIC_IP}:443:443"
+      - "${PUBLIC_IPV6}:443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik/certs:/etc/ssl/traefik:ro"
+      - "./traefik:/etc/traefik:ro"
+      # TLS Certificates
+      - "./traefik/letsencrypt:/letsencrypt:rw"
+    environment:
+      # For LetsEncrypt DNS challenges and an EdgeDNS managed domain:
+      # AKAMAI_CLIENT_TOKEN, AKAMAI_CLIENT_SECRET, AKAMAI_ACCESS_TOKEN
+      AKAMAI_CLIENT_TOKEN:  ${AKAMAI_CLIENT_TOKEN}
+      AKAMAI_CLIENT_SECRET: ${AKAMAI_CLIENT_SECRET}
+      AKAMAI_ACCESS_TOKEN:  ${AKAMAI_ACCESS_TOKEN}
+      AKAMAI_HOST:          ${AKAMAI_HOST}
+    networks:
+      backend:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lb.tls=true"

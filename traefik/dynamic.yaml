@@ -1,0 +1,25 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "/etc/ssl/traefik/wildcard.crt"
+        keyFile: "/etc/ssl/traefik/wildcard.key"
+  options:
+    default:
+      clientAuth:
+        caFiles:
+          - "/etc/ssl/traefik/wildcard.crt"
+        clientAuthType: "RequestClientCert"
+    mTLS:
+      minVersion: "VersionTLS12"
+      cipherSuites:
+        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+        - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+      clientAuth:
+        caFiles:
+          - "/etc/ssl/traefik/cacert.crt"
+          - "/etc/ssl/traefik/intermediate.crt"
+        clientAuthType: "RequireAndVerifyClientCert"

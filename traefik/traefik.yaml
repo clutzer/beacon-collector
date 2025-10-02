@@ -1,0 +1,44 @@
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: "websecure"
+          scheme: "https"
+  websecure:
+    address: ":443"
+
+  ping:
+    address: ":8082"
+
+providers:
+  providersThrottleDuration: "2s"
+  docker:
+    watch: true
+    endpoint: "unix:///var/run/docker.sock"
+    defaultRule: "Host(`{{ index .Labels \"com.docker.compose.service\" }}.internal`)"
+    # Not needed and just causes problems:
+    #network: "backend"
+  file:
+    watch: true
+    filename: "/etc/traefik/dynamic.yaml"
+
+log:
+  level: "INFO"
+  format: "common"
+
+api:
+  dashboard: true
+  insecure: true
+
+ping:
+  entryPoint: "ping"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "no@thankyou.com"
+      storage: "/letsencrypt/acme.json"
+      dnsChallenge:
+        provider: "edgedns"
