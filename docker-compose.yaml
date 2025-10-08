@@ -29,7 +29,29 @@ services:
       AKAMAI_ACCESS_TOKEN:  ${AKAMAI_ACCESS_TOKEN}
       AKAMAI_HOST:          ${AKAMAI_HOST}
     networks:
-      backend:
+      - backend
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.lb.tls=true"
+
+  collector:
+    build:
+      context: app
+      dockerfile: Dockerfile
+    volumes:
+      - ./app/logs:/logs
+    environment:
+      - FLASK_ENV=production
+    depends_on:
+      lb:
+        condition: service_started
+    networks:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.beacon.rule=Host(`beacons.internal`)"
+      - "traefik.http.routers.beacon.rule=Host(`beacons.${BEACON_DOMAIN}`)"
+      - "traefik.http.routers.beacon.entrypoints=websecure"
+      - "traefik.http.routers.beacon.tls=true"
+      - "traefik.http.routers.beacon.tls.certresolver=letsencrypt"
+      - "traefik.http.services.beacon.loadbalancer.server.port=8000"

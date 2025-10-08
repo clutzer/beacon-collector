@@ -1,0 +1,32 @@
+#!/usr/bin/env perl
+
+$NAME = "Beacon Collector";
+$HOME = $ENV{'HOME'};
+$BEACON_ROOT = $ENV{'BEACON_ROOT'};
+die "Invalid BEACON_ROOT: [$BEACON_ROOT]\n" unless -d $BEACON_ROOT;
+
+print "Running $NAME services:\n";
+my %services;
+# Note: obviously this makes the assumption the devenv dir is $HOME/devenv
+open(my $fh, "cd $BEACON_ROOT; docker compose ps --format \"{{.Service}}+{{.Status}}\" |") or die "Failed to read pipe\n";
+while (<$fh>) {
+    if (/^(\S+)\+(\S+) (.*)$/) {
+	my $status = "$2 [$3]";
+	(my $service = $1) =~ s/:[^:]+$//;
+	$services{$service} = $status;
+    }
+}
+close($fh);
+
+my $width = undef;
+foreach my $s (sort keys %services) {
+    my $len = length($s);
+    $width = $len unless $width;
+    $width = $len if $len > $width;
+}
+
+my $fmt = '%-' . ($width + 1) . 's'; # +1 for colon
+
+foreach my $s (sort keys %services) {
+    printf("    $fmt  $services{$s}\n", "$s:");
+}
