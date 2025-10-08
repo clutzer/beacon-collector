@@ -36,10 +36,10 @@ services:
 
   collector:
     build:
-      context: app
+      context: server
       dockerfile: Dockerfile
     volumes:
-      - ./app/logs:/logs
+      - ./server/logs:/logs
     environment:
       - FLASK_ENV=production
     depends_on:
