@@ -1,0 +1,12 @@
+[Unit]
+Description=Send beacon after boot
+After=network-online.target ssh.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/boot-beacon.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
