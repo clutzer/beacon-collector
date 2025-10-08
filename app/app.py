@@ -10,7 +10,7 @@ app = Flask(__name__)
 # Custom formatter to include UNIX timestamp
 class UnixTimeFormatter(logging.Formatter):
     def format(self, record):
-        record.unix_time = int(time.time())  # Add UNIX timestamp to log record
+        record.unix_time = int(time.time())
         return super().format(record)
 
 # Configure logging with rotation
@@ -26,8 +26,9 @@ logger.addHandler(handler)
 @app.route('/<path:path>')
 def collect_beacon(path):
     # Capture request details
-    client_ip = request.remote_addr
-    full_url = request.url
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+    proto = request.headers.get('X-Forwarded-Proto', 'http')
+    full_url = f"{proto}://{request.headers.get('Host', request.host)}{request.path}{request.query_string.decode() and '?' + request.query_string.decode() or ''}"
     headers = dict(request.headers)
     
     # Log the details
