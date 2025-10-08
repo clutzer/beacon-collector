@@ -3,14 +3,21 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from datetime import datetime
+import time
 
 app = Flask(__name__)
+
+# Custom formatter to include UNIX timestamp
+class UnixTimeFormatter(logging.Formatter):
+    def format(self, record):
+        record.unix_time = int(time.time())  # Add UNIX timestamp to log record
+        return super().format(record)
 
 # Configure logging with rotation
 log_file = '/logs/beacon.log'
 os.makedirs(os.path.dirname(log_file), exist_ok=True)
 handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=5)
-handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+handler.setFormatter(UnixTimeFormatter('%(asctime)s - Unix: %(unix_time)d - %(message)s'))
 logger = logging.getLogger('BeaconLogger')
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
